@@ -1,5 +1,6 @@
 from rest_framework import serializers
-
+from django.contrib.auth import authenticate, get_user_model
+from django.core.exceptions import ValidationError
 from .models import User
 
 
@@ -20,3 +21,23 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    token = serializers.CharField(allow_blank=True, read_only=True)
+    class Meta:
+        model = User
+        fields = ('email', 'password', 'token')
+
+    def validate(self, data):
+        username = data.get('email',None)
+        password = data['password']
+
+        user = authenticate(username=username, password=password)
+        if not user or not user.is_active:
+            raise ValidationError("Invalid email/password.")
+
+        # generate jwt token ??
+        # data['token'] = generated jwt token??
+
+        return data
+

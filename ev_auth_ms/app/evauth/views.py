@@ -5,8 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.utils import jwt_response_payload_handler
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
+from rest_framework_jwt.settings import api_settings
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserLoginSerializer
 from .permissions import IsOwnAccount
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -38,18 +39,26 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class LoginView(APIView):
     """User login view"""
-    parser_classes = (parsers.FormParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
-    serializer_class = JSONWebTokenSerializer
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+    def post(self, request, format=None):
+        serializer = UserLoginSerializer(data=request.data)
 
         if serializer.is_valid():
-            user = serializer.object.get('user') or request.user
-            token = serializer.object.get('token')
-            response_data = jwt_response_payload_handler(token, user, request)
 
-            return Response(response_data)
+            # Check if user has valid credentials and return user instance else None
+            user = authenticate(username=serializer.validated_data['username'],
+                                password=serializer.validated_data['password'])
 
-        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+            if user is not None:
+
+                jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+                jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+                payload = jwt_payload_handler(user)
+                token = jwt_encode_handler(payload)
+
+                return Response({'msg':'Login successful', 'token': token, 'is_login_success': True}, status=status.HTTP_200_OK)
+            else:
+                return Response({'msg': 'Credentials are not valid!'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
