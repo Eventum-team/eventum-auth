@@ -1,2 +1,0 @@
-# eventum-auth-ms
-# auth
