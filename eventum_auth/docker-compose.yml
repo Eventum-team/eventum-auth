@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  ev-auth-ms:
+    container_name: ev-auth-ms
+    build: .
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn -w 1 --bind 0.0.0.0:8000 api.wsgi"
+    volumes:
+      - .:/src
+    ports:
+      - "8000:8000"
+
