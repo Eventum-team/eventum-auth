@@ -23,7 +23,7 @@ class LoginView(generics.CreateAPIView):
     queryset = User.objects.all()
 
     def post(self, request, *args, **kwargs):
-        username = request.data.get("username", "")
+        username = request.data.get("email", "")
         password = request.data.get("password", "")
         user = authenticate(request, username=username, password=password)
         if user is not None:
@@ -46,9 +46,9 @@ class RegisterUsers(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
-        username = request.data.get("username", "")
-        password = request.data.get("password", "")
         email = request.data.get("email", "")
+        username = email
+        password = request.data.get("password", "")
         first_name = request.data.get("first_name", "")
         last_name= request.data.get("last_name", "")
         if not username and not password and not email:
@@ -112,8 +112,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         try:
-            a_user = self.queryset.get(pk=kwargs["pk"])
-            a_user.delete()
+            User.objects.get(pk=kwargs["pk"]).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except User.DoesNotExist:
             return Response(
@@ -122,7 +121,6 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
-
 
 
 
