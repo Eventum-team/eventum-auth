@@ -9,4 +9,20 @@ services:
       - .:/src
     ports:
       - "8000:8000"
+    depends_on:
+      - ev-auth-db-postgres
 
+  ev-auth-db-postgres:
+    image: postgres
+    container_name: ev-auth-db
+    volumes:
+      - ev_auth_db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=evauthdb
+
+volumes:
+  ev_auth_db:
