@@ -8,7 +8,7 @@ info:
   license:
     name: Software Architecture, 2020-I
 host: localhost:8000
-basePath: /reg/
+basePath: /auth/
 schemes:
   - http
 consumes:
@@ -16,111 +16,10 @@ consumes:
 produces:
   - application/json
 paths:
-  /users:
-    get:
-      summary: Returns all users
-      operationId: getAllUsers
-      responses:
-        '200':
-          description: Ok
-          schema:
-            $ref: '#/definitions/UsersList'
-        '406':
-          description: Not Acceptable (Invalid Params)
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-
-  /users/{id}:
-    get:
-      summary: Returns an user with the given id
-      operationId: getUserById
-      parameters:
-        - name: id
-          in: path
-          description: The id of the user to be returned
-          required: true
-          type: integer
-      responses:
-        '200':
-          description: Ok
-          schema:
-            $ref: '#/definitions/User'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '406':
-            description: Not Acceptable (Invalid Params)
-            schema:
-              $ref: '#/definitions/ErrorModel'
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-
-    put:
-      summary: Updates an user with the given id
-      operationId: updateUser
-      parameters:
-        - name: id
-          in: path
-          description: The id of the user to be updated
-          required: true
-          type: integer
-        - name: user
-          in: body
-          required: true
-          description: User Object
-          schema:
-            $ref: '#/definitions/UserInput'
-      responses:
-        '204':
-          description: No Content
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '406':
-            description: Not Acceptable (Invalid Params)
-            schema:
-              $ref: '#/definitions/ErrorModel'
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-
-    delete:
-      summary: Deletes an user with the given id
-      operationId: deleteCUser
-      parameters:
-        - name: id
-          in: path
-          description: The id of the user to be deleted
-          required: true
-          type: integer
-      responses:
-        '200':
-          description: Ok
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '406':
-            description: Not Acceptable (Invalid Params)
-            schema:
-              $ref: '#/definitions/ErrorModel'
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /auth/login/:          
+  /login/:          
     post:
-      summary: Creates a new user
-      operationId: createUser
+      summary: gets username (email) and password to get access and refresh tokens
+      operationId: login
       parameters:
         - name: user
           in: body
@@ -129,30 +28,80 @@ paths:
           schema:
             $ref: '#/definitions/LoginInput'
       responses:
-        '201':
-          description: Created
-        '400':
-          description: Bad Request
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Tokens'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /auth/register/:          
+  /login/refresh/:          
     post:
-      summary: To login as an existing user
-      operationId: loginUser
+      summary: Get a new access token with the refresh token 
+      operationId: refresh 
+      parameters:
+        - name: refresh token
+          in: body
+          required: true
+          description: Token
+          schema:
+            $ref: '#/definitions/RefreshToken'
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/AccessToken'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /login/verify/:          
+    post:
+      summary: Verifies the access token
+      operationId: verify
+      parameters:
+        - name: access
+          in: body
+          required: true
+          description: Token
+          schema:
+            $ref: '#/definitions/VerifyToken'
+      responses:
+        '200':
+          description: Ok
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /register/:          
+    post:
+      summary: To create a new user
+      operationId: register
       parameters:
         - name: user
           in: body
           required: true
           description: User Object
           schema:
-            $ref: '#/definitions/UserInput'
+            $ref: '#/definitions/RegisterInput'
       responses:
         '201':
           description: Created
+          schema:
+            $ref: '#/definitions/RegisterInput'
         '400':
           description: Bad Request
           schema:
@@ -164,39 +113,12 @@ paths:
 
 definitions:
 
-  # Users
-  User:
-    type: object
-    properties:
-      id:
-        type: integer
-      firstName:
-        type: string
-      lastName:
-        type: string
-      email:
-        type: string
-      is_staff:
-        type: boolean
-      is_superuser:
-        type: boolean
-      is_active:
-        type: boolean
-      date_joined:
-        type: boolean
-
-  UserInput:
+  RegisterInput:
     type: object
     properties:
       username:
         type: string
-      email:
-        type: string
       password:
-        type: string
-      firstName:
-        type: string
-      lastName:
         type: string
         
   LoginInput:
@@ -206,19 +128,30 @@ definitions:
         type: string
       password:
         type: string
-
-  UsersList:
+  Tokens:
     type: object
-    required:
-      - total
-      - list
     properties:
-      total:
-        type: number
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/User'
+      refresh:
+        type: string
+      access:
+        type: string
+        
+  RefreshToken:
+    type: object
+    properties:
+      refresh:
+        type: string
+        
+  AccessToken:
+    type: object
+    properties:
+      access:
+        type: string
+  VerifyToken:
+    type: object
+    properties:
+      token:
+        type: string
 
 # Errors
   ErrorModel:
@@ -230,6 +163,4 @@ definitions:
       message:
         type: string
       code:
-        type: number
-      description:
-        type: object
+        type: string
