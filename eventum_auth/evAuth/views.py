@@ -35,17 +35,17 @@ class RegisterUsers(generics.CreateAPIView):
 
         username = request.data.get("username", "")
         password = request.data.get("password", "")
-        if not username and not password:
+        if not username or not password:
             return Response(
                 data={
-                    "Mensaje": "Registro incorrecto"
+                    "detail": "Registro incorrecto"
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         if is_email(username)==False:
             return Response(
                 data={
-                    "Mensaje": "Email no es válido"
+                    "detail": "Email no es válido"
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
