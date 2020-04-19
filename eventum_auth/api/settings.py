@@ -20,7 +20,7 @@ SECRET_KEY = 'k@)#^s3*nig9+(4oxzykhcfxx3(lw8t)@hu%+-5)s@0zx^(5@o'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["web", "127.0.0.1"]
+ALLOWED_HOSTS = ["web", "127.0.0.1", "localhost"]
 
 
 INSTALLED_APPS = [
