@@ -35,17 +35,25 @@ class RegisterUsers(generics.CreateAPIView):
 
         username = request.data.get("username", "")
         password = request.data.get("password", "")
+        if User.objects.filter(username=username).exists():
+                return Response(
+                data={
+                    "message": "user already exists"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
         if not username or not password:
             return Response(
                 data={
-                    "detail": "Registro incorrecto"
+                    "message": "incomplete form"
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         if is_email(username)==False:
             return Response(
                 data={
-                    "detail": "Email no es válido"
+                    "message": "not a valid email"
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -54,6 +62,8 @@ class RegisterUsers(generics.CreateAPIView):
             username=username, password=password
         )
         return Response(
-            data=UserSerializer(new_user).data,
+            data={
+                    "message": "user created"
+                },
             status=status.HTTP_201_CREATED
         )
