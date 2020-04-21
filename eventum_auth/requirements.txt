@@ -6,3 +6,6 @@ gunicorn==19.7.1
 PyJWT==1.6.1
 pytz==2018.3
 psycopg2>=2.7,<3.0
+python-ldap
+django-auth-ldap
+django-ldapdb

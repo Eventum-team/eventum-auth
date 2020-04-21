@@ -12,6 +12,43 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 import datetime
+import ldap
+from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+#///////////////////////////////////////////////////////////////////////////////////////////////////
+#////////////////////////////////////////LDAP///////////////////////////////////////////////////////
+#///////////////////////////////////////////////////////////////////////////////////////////////////
+# Baseline configuration.
+
+AUTH_LDAP_SERVER_URI = "ldap://192.168.48.3:389"
+#AUTH_LDAP_SERVER_URI = "sa-ldap"
+
+AUTH_LDAP_BIND_DN = "cn=admin,dc=arqsoft,dc=unal,dc=edu,dc=co"
+AUTH_LDAP_BIND_PASSWORD = "admin"
+
+AUTH_LDAP_USER_DN_TEMPLATE = "cn=%(user)s,cn=user,dc=arqsoft,dc=unal,dc=edu,dc=co"
+AUTH_LDAP_USER_ATTR_MAP = {
+    "username"  : "sAMAccountName",
+    "first_name"  : "givenName",
+    "last_name"  : "sn",
+    "email"  : "mail",
+}
+
+# Keep ModelBackend around for per-user permissions and maybe a local
+# superuser.
+AUTHENTICATION_BACKENDS = (
+    "django_auth_ldap.backend.LDAPBackend",
+    "django.contrib.auth.backends.ModelBackend",
+)
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {"django_auth_ldap": {"level": "DEBUG", "handlers": ["console"]}},
+}
+#///////////////////////////////////////////////////////////////////////////////////////////////////
+#////////////////////////////////////////LDAP///////////////////////////////////////////////////////
+#///////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
