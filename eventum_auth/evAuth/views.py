@@ -19,10 +19,6 @@ def is_email(value):
         return True
 
 class CustomTokenVerifyView(TokenViewBase):
-    """
-    Takes a token and indicates if it is valid.  This view provides no
-    information about a token's fitness for a particular use.
-    """
     serializer_class = CustomTokenVerifySerializer
 
 class RegisterUsers(generics.CreateAPIView):
@@ -35,6 +31,7 @@ class RegisterUsers(generics.CreateAPIView):
 
         username = request.data.get("username", "")
         password = request.data.get("password", "")
+        idUser = request.data.get("idUser", "")
         if User.objects.filter(username=username).exists():
                 return Response(
                 data={
@@ -42,8 +39,8 @@ class RegisterUsers(generics.CreateAPIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-    
-        if not username or not password:
+
+        if not username or not password or not idUser:
             return Response(
                 data={
                     "message": "incomplete form"
@@ -59,7 +56,7 @@ class RegisterUsers(generics.CreateAPIView):
             )
 
         new_user = User.objects.create_user(
-            username=username, password=password
+            username=username, password=password, last_name=idUser
         )
         return Response(
             data={
